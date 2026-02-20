@@ -31,6 +31,11 @@ const routes = [
     component: () => import('../views/admin/AdminOrdersView.vue'),
     meta: { requiresAuth: true, role: 'ADMIN' }
   },
+  {
+    path: '/cart',
+    component: () => import('../views/client/CartView.vue'),
+    meta: { requiresAuth: true, role: 'CLIENT' }
+  },
 
   // 404
   { path: '/:pathMatch(.*)*', redirect: '/' }

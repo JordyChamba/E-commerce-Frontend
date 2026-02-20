@@ -6,11 +6,8 @@
     <div v-else-if="product" class="bg-white rounded-2xl shadow p-8 flex gap-8">
       <!-- Imagen -->
       <div class="w-1/2">
-        <img
-          :src="product.imageUrl || 'https://via.placeholder.com/400x300?text=Sin+imagen'"
-          :alt="product.name"
-          class="w-full h-80 object-cover rounded-2xl"
-        />
+        <img :src="product.imageUrl || 'https://via.placeholder.com/400x300?text=Sin+imagen'" :alt="product.name"
+          class="w-full h-80 object-cover rounded-2xl" />
       </div>
 
       <!-- Info -->
@@ -36,23 +33,14 @@
           <div v-else-if="auth.isClient()">
             <div class="flex items-center gap-3 mb-4">
               <label class="text-sm text-gray-600">Cantidad:</label>
-              <input
-                v-model="quantity"
-                type="number"
-                min="1"
-                :max="product.stock"
-                class="border rounded-lg px-3 py-2 w-20 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+              <input v-model="quantity" type="number" min="1" :max="product.stock"
+                class="border rounded-lg px-3 py-2 w-20 text-center focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
-            <button
-              @click="buyProduct"
-              :disabled="product.stock === 0 || loading"
-              class="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition"
-            >
-              {{ product.stock === 0 ? 'Sin stock' : 'Comprar ahora' }}
+            <button @click="addToCart" :disabled="product.stock === 0"
+              class="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition mb-2">
+              {{ product.stock === 0 ? 'Sin stock' : '🛒 Agregar al carrito' }}
             </button>
-            <p v-if="success" class="text-green-600 text-sm text-center mt-3">{{ success }}</p>
-            <p v-if="error" class="text-red-500 text-sm text-center mt-3">{{ error }}</p>
+            <p v-if="success" class="text-green-600 text-sm text-center mt-2">{{ success }}</p>
           </div>
         </div>
       </div>
@@ -70,6 +58,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { productsApi } from '../../api/products'
 import { ordersApi } from '../../api/orders'
 import { authStore as auth } from '../../stores/auth'
+import { cartStore as cart } from '../../stores/cart'
 
 const route = useRoute()
 const router = useRouter()
@@ -91,18 +80,10 @@ const fetchProduct = async () => {
   }
 }
 
-const buyProduct = async () => {
-  error.value = ''
-  success.value = ''
-  try {
-    await ordersApi.create({
-      items: [{ productId: product.value.id, quantity: quantity.value }]
-    })
-    success.value = '¡Orden creada exitosamente!'
-    setTimeout(() => router.push('/my-orders'), 1500)
-  } catch (e) {
-    error.value = e.response?.data?.message || 'Error al crear la orden'
-  }
+const addToCart = () => {
+  cart.addItem(product.value, quantity.value)
+  success.value = '¡Agregado al carrito!'
+  setTimeout(() => success.value = '', 2000)
 }
 
 onMounted(fetchProduct)
